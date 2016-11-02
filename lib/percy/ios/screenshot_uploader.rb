@@ -12,9 +12,11 @@ module Percy
         Percy.logger.debug { "uploading screenshots: #{screenhosts_by_path_by_device}" }
         with_percy_build do |client, build, current_build_id|
           screenhosts_by_path_by_device.each do |path, screenshots_by_device|
-            images = screenshots_by_device.map do |device_name, screenshot| 
+            images = screenshots_by_device.map do |device_name, screenshot|
+              progress "loading image - #{path} #{device_name}....."
               image = _load(screenshot)
-              _erase_rects(image, device_name)
+              progress "erasing image rect - #{path} #{device_name}....."
+              _erase_rects(image, screenshot[:device], path)
               width = image.width
               height = image.height
               if width > 1200
@@ -35,12 +37,19 @@ module Percy
             html = Percy::Client::Resource.new(full_path, is_root: true, content:_build_html(images), mimetype: "text/html")
             resources = [html] + images.map { |image_info| image_info[:resource] }
             _dbg_save_resources(resources, "/tmp/percy-dbg") if Percy.config.debug
+            progress "uploading - #{path}...."
             upload_resources(resources, client, current_build_id, widths: images.map { |i| i[:width] }, name: path)
+            progress "uploaded - #{path}....."
           end
         end
       end
 
       private
+
+      def progress(message)
+        STDOUT.write "\r#{message}"
+        STDOUT.flush
+      end
 
       def failed?
         @failed
@@ -151,9 +160,9 @@ module Percy
         ChunkyPNG::Color::WHITE
       end
 
-      def _erase_rects(image, device)
-        @rects_to_erase[device, image.width, image.height].each do |rect|
-          image.rect(rect[:x], rect[:y], rect[:x] + rect[:width], rect[:x] + rect[:height], ChunkyPNG::Color::TRANSPARENT, _color_to_chunky_png(rect[:color]))
+      def _erase_rects(image, device, path)
+        @rects_to_erase[device, path, image.width, image.height].each do |rect|
+          image.rect(rect[:x], rect[:y], rect[:x] + rect[:width], rect[:y] + rect[:height], ChunkyPNG::Color::TRANSPARENT, _color_to_chunky_png(rect[:color]))
         end
       end
     end

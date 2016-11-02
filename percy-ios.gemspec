@@ -21,4 +21,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'percy-client', '~> 1.9.0'
   spec.add_dependency 'chunky_png', '~> 1.3.1'
   spec.add_dependency 'plist', '~> 3.2.0'
+
+  spec.add_development_dependency 'rspec', '~> 3.2'
 end
