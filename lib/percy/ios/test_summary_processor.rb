@@ -1,5 +1,7 @@
 require 'percy/ios/device_info'
 require 'plist'
+require 'percy'
+
 
 module Percy
   class IOS
@@ -55,7 +57,7 @@ module Percy
       def self._filter_screenshots(screenshots)
         screenshots.map do |screenshot|
           if screenshot[:path][1].start_with? "io.percy/"
-            path = screenshot[:path][0][:test_id].chomp('()') + "/" + screenshot[:path][1].dup
+            path = screenshot[:path][1].dup
             path.slice!('io.percy/')
             { orinal_path: screenshot[:path], path:path, UUID:screenshot[:UUID] }
           end
