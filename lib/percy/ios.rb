@@ -6,7 +6,7 @@ module Percy
   class IOS
     attr_accessor :derived_data_dir
 
-    CLOCK_WIDTH = 200
+    CLOCK_WIDTH = 60
     STATUSBAR_HEIGHT = 20
 
     ScreenshotInfo = Struct.new(:width, :height, :device, :path)
